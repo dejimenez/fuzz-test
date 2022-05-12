@@ -1,0 +1,43 @@
+FROM alpine as clone
+
+RUN apk add --no-cache git
+RUN git clone https://github.com/microsoft/restler-fuzzer.git
+
+
+FROM --platform=linux/x86_64/v8 mcr.microsoft.com/dotnet/sdk:5.0 as builder
+
+RUN apt-get --no-cache python3 py3-pip
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+COPY --from=clone /restler-fuzzer/src ./src
+COPY --from=clone /restler-fuzzer/restler ./restler
+COPY --from=clone /restler-fuzzer/build-restler.py .
+
+RUN python3 build-restler.py --dest_dir /build
+
+RUN python3 -m compileall -b /build/engine
+
+
+FROM --platform=linux/x86_64/v8 mcr.microsoft.com/dotnet/aspnet:5.0 as target
+
+WORKDIR /app
+
+RUN apk update && apk upgrade
+RUN apt-get --no-cache python3 py3-pip
+RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN apt-get --no-cache postgresql-libs postgresql-dev python3-dev
+RUN apt-get --no-cache --virtual .build-deps gcc musl-dev
+
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
+
+RUN apk del .build-deps gcc musl-dev
+
+COPY --from=builder /build /app/restler
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app"]
+ 
