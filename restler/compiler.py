@@ -1,11 +1,10 @@
-import subprocess
+from runner import run_subprocess
 
 
-def compile(openapi: str):
+def compile(openapi_directory: str):
     # You can put the parts of your command in the list below or just use a string directly.
-    command_to_execute = ["restler", "compile", "--api_spec", openapi]
 
-    run = subprocess.run(command_to_execute, capture_output=True)
+    command_to_execute = ["./restler/restler/Restler",
+                          "compile", "--api_spec", f"{openapi_directory}/spec.json"]
 
-    print(run.stdout, flush=True)  # the output "Test"
-    print(run.stderr, flush=True)  # the error part of the output
+    run_subprocess(command_to_execute)

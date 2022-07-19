@@ -1,3 +1,4 @@
+import os
 from typing import List
 from uuid import UUID, uuid4
 from fuzz.model.fuzz_test import FuzzTestModel
@@ -8,7 +9,7 @@ from datetime import datetime
 import json
 import requests
 
-# import restler
+from restler.compiler import compile
 
 
 async def get_fuzz_test(db: Session, id: UUID):
@@ -40,11 +41,14 @@ async def create_fuzz_test(db: Session, fuzz_test: FuzzTestCreate):
 async def get_openapi(fuzz_test: FuzzTest):
     r = requests.get(url=fuzz_test.url)
     data = r.json()
-    filename = str(fuzz_test.id)
+    directory = str(fuzz_test.id)
 
-    with open(f"tofuzz/{filename}.json", "w", encoding="utf-8") as f:
+    os.mkdir(f"tofuzz/{directory}")
+    with open(f"tofuzz/{directory}/spec.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+    
+    await compile_fuzz_test(directory)
 
 
-async def compile(fuzz_test: FuzzTest):
-    pass
+async def compile_fuzz_test(directory: str):
+    compile(f"tofuzz/{directory}")

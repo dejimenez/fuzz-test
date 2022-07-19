@@ -32,11 +32,11 @@ RUN apk update && apk upgrade && \
     pip3 install --no-cache-dir --upgrade -r requirements.txt && \
     apk del .build-deps gcc musl-dev g++ python3-dev libffi-dev openssl-dev postgresql-dev python3-dev
 
-COPY --from=builder /build /fuzz/restler
-
 COPY . .
+
+COPY --from=builder /build /fuzz/restler
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
  

@@ -4,6 +4,10 @@ applicationinsights==0.11.10
 fastapi==0.75.1
 pydantic==1.9.0
 uvicorn[standard]==0.17.6
-SQLAlchemy==1.4.35
+sqlmodel==0.0.4
+# SQLAlchemy==1.4.35
 # psycopg2-binary==2.9.3
 psycopg2==2.9.3
+
+alembic==1.7.7
+asyncpg==0.25.0
